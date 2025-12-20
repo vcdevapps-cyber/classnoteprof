@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Ícones - ClassNote</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0; padding: 20px; min-height: 100vh;
+        }
+        .container { 
+            max-width: 800px; margin: 0 auto; 
+            background: white; border-radius: 20px; 
+            padding: 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        h1 { 
+            color: #4361ee; text-align: center; 
+            margin-bottom: 30px; font-size: 2rem;
+        }
+        .icon-preview { 
+            display: flex; flex-wrap: wrap; gap: 15px; 
+            justify-content: center; margin: 30px 0;
+        }
+        .icon-item { 
+            text-align: center; padding: 15px; 
+            background: #f8f9fa; border-radius: 12px;
+            border: 2px solid #e9ecef;
+        }
+        canvas { 
+            border: 1px solid #ddd; border-radius: 8px; 
+            margin-bottom: 8px; display: block;
+        }
+        button { 
+            background: linear-gradient(45deg, #4361ee, #7209b7); 
+            color: white; border: none; padding: 12px 24px; 
+            border-radius: 8px; cursor: pointer; font-weight: 600;
+            margin: 5px; transition: transform 0.2s;
+        }
+        button:hover { transform: translateY(-2px); }
+        .controls { 
+            text-align: center; margin: 20px 0; 
+            padding: 20px; background: #f8f9fa; border-radius: 12px;
+        }
+        .color-input { 
+            margin: 10px; padding: 8px; border-radius: 6px; 
+            border: 2px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📱 Gerador de Ícones - ClassNote</h1>
+        
+        <div class="controls">
+            <label>Cor de Fundo: 
+                <input type="color" id="bgColor" value="#4361ee" class="color-input">
+            </label>
+            <label>Cor do Ícone: 
+                <input type="color" id="iconColor" value="#ffffff" class="color-input">
+            </label>
+            <br>
+            <button onclick="generateAllIcons()">🎨 Gerar Todos os Ícones</button>
+            <button onclick="downloadAll()">📦 Baixar Todos</button>
+        </div>
+
+        <div class="icon-preview" id="iconPreview"></div>
+    </div>
+
+    <script>
+        const iconSizes = [
+            { size: 16, name: 'favicon-16x16.png' },
+            { size: 32, name: 'favicon-32x32.png' },
+            { size: 70, name: 'icon-70.png' },
+            { size: 72, name: 'icon-72.png' },
+            { size: 96, name: 'icon-96.png' },
+            { size: 128, name: 'icon-128.png' },
+            { size: 144, name: 'icon-144.png' },
+            { size: 150, name: 'icon-150.png' },
+            { size: 152, name: 'icon-152.png' },
+            { size: 180, name: 'icon-180.png' },
+            { size: 192, name: 'icon-192.png' },
+            { size: 310, name: 'icon-310.png' },
+            { size: 384, name: 'icon-384.png' },
+            { size: 512, name: 'icon-512.png' }
+        ];
+
+        let generatedIcons = [];
+
+        function drawIcon(canvas, size, bgColor, iconColor) {
+            const ctx = canvas.getContext('2d');
+            canvas.width = size;
+            canvas.height = size;
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, size, size);
+            
+            // Background with gradient
+            const gradient = ctx.createLinearGradient(0, 0, size, size);
+            gradient.addColorStop(0, bgColor);
+            gradient.addColorStop(1, adjustBrightness(bgColor, -20));
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, size, size);
+            
+            // Icon design - Book with pen
+            ctx.fillStyle = iconColor;
+            ctx.strokeStyle = iconColor;
+            
+            const scale = size / 100;
+            ctx.lineWidth = 2 * scale;
+            
+            // Book base
+            const bookX = 20 * scale;
+            const bookY = 25 * scale;
+            const bookW = 45 * scale;
+            const bookH = 50 * scale;
+            
+            // Book cover
+            ctx.fillRect(bookX, bookY, bookW, bookH);
+            
+            // Book pages (lighter)
+            ctx.fillStyle = adjustBrightness(iconColor, 30);
+            ctx.fillRect(bookX + 3 * scale, bookY + 3 * scale, bookW - 6 * scale, bookH - 6 * scale);
+            
+            // Book lines
+            ctx.strokeStyle = adjustBrightness(iconColor, -30);
+            ctx.lineWidth = 1 * scale;
+            for (let i = 0; i < 4; i++) {
+                const lineY = bookY + 15 * scale + (i * 8 * scale);
+                ctx.beginPath();
+                ctx.moveTo(bookX + 8 * scale, lineY);
+                ctx.lineTo(bookX + bookW - 8 * scale, lineY);
+                ctx.stroke();
+            }
+            
+            // Pen
+            ctx.fillStyle = iconColor;
+            const penX = 55 * scale;
+            const penY = 20 * scale;
+            const penW = 4 * scale;
+            const penH = 35 * scale;
+            
+            // Pen body
+            ctx.fillRect(penX, penY, penW, penH);
+            
+            // Pen tip
+            ctx.beginPath();
+            ctx.moveTo(penX, penY + penH);
+            ctx.lineTo(penX + penW/2, penY + penH + 8 * scale);
+            ctx.lineTo(penX + penW, penY + penH);
+            ctx.fill();
+            
+            // Pen clip
+            ctx.fillStyle = adjustBrightness(iconColor, 50);
+            ctx.fillRect(penX + penW/4, penY - 3 * scale, penW/2, 8 * scale);
+            
+            // Add subtle shadow
+            ctx.shadowColor = 'rgba(0,0,0,0.2)';
+            ctx.shadowBlur = 2 * scale;
+            ctx.shadowOffsetX = 1 * scale;
+            ctx.shadowOffsetY = 1 * scale;
+        }
+
+        function adjustBrightness(hex, percent) {
+            const num = parseInt(hex.replace("#", ""), 16);
+            const amt = Math.round(2.55 * percent);
+            const R = (num >> 16) + amt;
+            const G = (num >> 8 & 0x00FF) + amt;
+            const B = (num & 0x0000FF) + amt;
+            return "#" + (0x1000000 + (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 +
+                (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 +
+                (B < 255 ? B < 1 ? 0 : B : 255)).toString(16).slice(1);
+        }
+
+        function generateAllIcons() {
+            const preview = document.getElementById('iconPreview');
+            const bgColor = document.getElementById('bgColor').value;
+            const iconColor = document.getElementById('iconColor').value;
+            
+            preview.innerHTML = '';
+            generatedIcons = [];
+            
+            iconSizes.forEach(({size, name}) => {
+                const container = document.createElement('div');
+                container.className = 'icon-item';
+                
+                const canvas = document.createElement('canvas');
+                drawIcon(canvas, size, bgColor, iconColor);
+                
+                const label = document.createElement('div');
+                label.textContent = `${size}x${size}`;
+                label.style.fontSize = '12px';
+                label.style.fontWeight = 'bold';
+                label.style.color = '#666';
+                
+                const downloadBtn = document.createElement('button');
+                downloadBtn.textContent = '⬇️';
+                downloadBtn.style.padding = '4px 8px';
+                downloadBtn.style.fontSize = '12px';
+                downloadBtn.onclick = () => downloadIcon(canvas, name);
+                
+                container.appendChild(canvas);
+                container.appendChild(label);
+                container.appendChild(downloadBtn);
+                preview.appendChild(container);
+                
+                generatedIcons.push({canvas, name});
+            });
+        }
+
+        function downloadIcon(canvas, filename) {
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        function downloadAll() {
+            if (generatedIcons.length === 0) {
+                alert('Gere os ícones primeiro!');
+                return;
+            }
+            
+            generatedIcons.forEach(({canvas, name}) => {
+                setTimeout(() => downloadIcon(canvas, name), 100);
+            });
+        }
+
+        // Generate icons on load
+        window.onload = () => {
+            generateAllIcons();
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,128 @@
+{
+  "id": "com.classnote.app.v1",
+  "name": "ClassNote - Lembretes rápidos de aula",
+  "short_name": "ClassNote",
+  "description": "App profissional para lembretes rápidos de aula e anotações pedagógicas",
+  "start_url": "./landing.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0d1028",
+  "theme_color": "#4361ee",
+  "categories": ["education", "productivity", "utilities"],
+  "lang": "pt-BR",
+  "dir": "ltr",
+  "prefer_related_applications": false,
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  "icons": [
+    {
+      "src": "./icon-72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "./screenshot-mobile.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "ClassNote - Interface principal"
+    },
+    {
+      "src": "./screenshot-desktop.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "ClassNote - Versão desktop"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Nova Anotação",
+      "short_name": "Nova",
+      "description": "Criar uma nova anotação de aula",
+      "url": "./index.html?action=new",
+      "icons": [{ 
+        "src": "./icon-192.png", 
+        "sizes": "192x192",
+        "type": "image/png"
+      }]
+    },
+    {
+      "name": "Gerar PDF",
+      "short_name": "PDF",
+      "description": "Exportar relatório em PDF",
+      "url": "./index.html?action=pdf",
+      "icons": [{ 
+        "src": "./icon-192.png", 
+        "sizes": "192x192",
+        "type": "image/png"
+      }]
+    }
+  ],
+  "protocol_handlers": [
+    {
+      "protocol": "web+classnote",
+      "url": "./index.html?note=%s"
+    }
+  ]
+}

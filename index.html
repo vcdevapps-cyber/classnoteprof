@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>ClassNote - Lembretes rápidos de aula</title>
+    <meta name="description" content="App profissional para lembretes rápidos de aula e anotações pedagógicas">
+    <meta name="keywords" content="aula, lembretes, educação, professor, anotações, pedagógico">
+    <meta name="author" content="ClassNote App">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#4361ee">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="./manifest.json">
+    
+    <!-- iOS Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="ClassNote">
+    <link rel="apple-touch-icon" href="./icon-180.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="./icon-152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="./icon-180.png">
+    <link rel="apple-touch-startup-image" href="./splash-640x1136.png" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)">
+    <link rel="apple-touch-startup-image" href="./splash-750x1334.png" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)">
+    <link rel="apple-touch-startup-image" href="./splash-1242x2208.png" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3)">
+    
+    <!-- Microsoft Meta Tags -->
+    <meta name="msapplication-TileColor" content="#4361ee">
+    <meta name="msapplication-TileImage" content="./icon-144.png">
+    <meta name="msapplication-config" content="./browserconfig.xml">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png">
+    <link rel="shortcut icon" href="./favicon.ico">
+    
+    <!-- External Resources -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3a0ca3;
+            --accent: #7209b7;
+            --success: #4cc9f0;
+            --warning: #f72585;
+            --dark: #1a1a2e;
+            --card-bg: #16213e;
+            --text-main: #ffffff;
+            --text-secondary: #b8b8d1;
+            --safe-top: env(safe-area-inset-top);
+            --safe-bottom: env(safe-area-inset-bottom);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--dark) 0%, #0f3460 100%);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: calc(20px + var(--safe-top)) 20px calc(20px + var(--safe-bottom)) 20px;
+        }
+
+        .container { max-width: 800px; margin: 0 auto; }
+
+        .app-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 30px; padding: 15px; background: rgba(26, 26, 46, 0.9);
+            border-radius: 20px; backdrop-filter: blur(10px); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .logo-section { display: flex; align-items: center; gap: 15px; }
+        .logo-icon { width: 40px; height: 40px; background: linear-gradient(45deg, var(--primary), var(--accent)); border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+        .app-title h1 { font-size: 1.5rem; background: linear-gradient(45deg, var(--primary), var(--success)); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+        .main-card { background: var(--card-bg); border-radius: 24px; padding: 30px; margin-bottom: 30px; border: 1px solid rgba(255, 255, 255, 0.1); }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 25px; }
+        .input-group { display: flex; flex-direction: column; margin-bottom: 15px; }
+        
+        input, textarea, select {
+            background: rgba(255, 255, 255, 0.05); border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px; padding: 15px; color: white; font-size: 1rem; width: 100%;
+        }
+
+        /* Ensure consistent sizing for mobile */
+        @media (max-width: 768px) {
+            .form-grid { 
+                grid-template-columns: 1fr 1fr; 
+                gap: 15px; 
+            }
+            .form-grid .input-group {
+                margin-bottom: 10px;
+            }
+            input[type="date"] {
+                min-width: 0; /* Allow date input to shrink */
+                flex: 1;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .form-grid { 
+                grid-template-columns: 1fr; 
+                gap: 15px; 
+            }
+        }
+
+        .action-buttons { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+        .btn { flex: 1; min-width: 120px; padding: 15px; border: none; border-radius: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-primary { background: linear-gradient(45deg, var(--primary), var(--secondary)); color: white; }
+        .btn-secondary { background: rgba(255, 255, 255, 0.1); color: white; border: 1px solid rgba(255,255,255,0.2); }
+        .btn-warning { background: linear-gradient(45deg, var(--warning), #b5179e); color: white; }
+        .btn-danger { background: #e63946; color: white; }
+
+        .note-card { background: rgba(255, 255, 255, 0.05); border-radius: 18px; padding: 20px; margin-bottom: 15px; border-left: 5px solid var(--primary); }
+        .note-actions { display: flex; gap: 10px; margin-top: 15px; justify-content: flex-end; }
+
+        #installBanner { display: none; position: fixed; bottom: 20px; left: 20px; right: 20px; background: var(--primary); padding: 15px; border-radius: 15px; z-index: 2000; justify-content: space-between; align-items: center; }
+        #toast { position: fixed; bottom: 30px; right: 30px; background: var(--success); color: white; padding: 12px 20px; border-radius: 10px; display: none; z-index: 3000; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="app-header">
+            <div class="logo-section">
+                <div class="logo-icon"><i class="fas fa-book-open"></i></div>
+                <div class="app-title">
+                    <h1>ClassNote</h1>
+                    <span style="font-size: 0.85rem; color: var(--text-secondary);">Lembretes rápidos de aula</span>
+                </div>
+            </div>
+            <div style="background: rgba(67, 97, 238, 0.2); padding: 8px 15px; border-radius: 50px; display: flex; align-items: center; gap: 8px;">
+                <i class="fas fa-sticky-note" style="font-size: 0.9rem;"></i>
+                <span>Notas: <span id="total-notes">0</span>/50</span>
+            </div>
+        </header>
+
+        <main class="main-card">
+            <form id="noteForm">
+                <input type="hidden" id="note-id">
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label>Disciplina</label>
+                        <input type="text" id="disciplina" oninput="autoSave()">
+                    </div>
+                    <div class="input-group">
+                        <label>Turma</label>
+                        <input type="text" id="turma" oninput="autoSave()">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Tópico/Conteúdo</label>
+                    <input type="text" id="conteudo" oninput="autoSave()">
+                </div>
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label>Data</label>
+                        <input type="date" id="data" oninput="autoSave()">
+                    </div>
+                    <div class="input-group">
+                        <label>Importância</label>
+                        <select id="nivel_importancia" oninput="autoSave()">
+                            <option value="">Selecione...</option>
+                            <option value="Importante">Importante</option>
+                            <option value="Muito Importante">Muito Importante</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Observações:</label>
+                    <textarea id="anotacoes" oninput="autoSave()"></textarea>
+                </div>
+
+                <div class="action-buttons">
+                    <button type="button" class="btn btn-primary" onclick="saveNote()"><i class="fas fa-save"></i> Salvar</button>
+                    <button type="button" class="btn btn-secondary" onclick="resetForm()"><i class="fas fa-plus"></i> Novo</button>
+                    <button type="button" class="btn btn-warning" onclick="generatePDF()"><i class="fas fa-file-pdf"></i> PDF</button>
+                </div>
+            </form>
+        </main>
+
+        <section>
+            <div style="display:flex; justify-content:space-between; margin-bottom:15px; align-items:center;">
+                <h2>Histórico</h2>
+                <button class="btn btn-secondary" onclick="clearAllNotes()" style="flex:none; padding:8px 15px;">Limpar Tudo</button>
+            </div>
+            <div id="notes-list"></div>
+        </section>
+    </div>
+
+    <div id="installBanner">
+        <div>
+            <strong>📱 Instalar ClassNote</strong>
+            <p style="margin: 5px 0 0 0; font-size: 0.9rem; opacity: 0.9;">Acesso rápido e offline</p>
+        </div>
+        <button onclick="installApp()" style="background:white; color:var(--primary); padding:10px 16px; border-radius:10px; border:none; font-weight:600; cursor:pointer;">
+            <i class="fas fa-download"></i> Instalar
+        </button>
+    </div>
+
+    <div id="toast"></div>
+
+    <script>
+        const STORAGE_KEY = 'classnote_app_v4';
+        let notes = [];
+        let saveTimeout = null;
+        let deferredPrompt;
+        let isInstalled = false;
+
+        // Check if app is installed
+        function checkInstallStatus() {
+            // Check if running as PWA
+            if (window.matchMedia('(display-mode: standalone)').matches || 
+                window.navigator.standalone === true) {
+                isInstalled = true;
+                document.getElementById('installBanner').style.display = 'none';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadNotes();
+            checkInstallStatus();
+            document.getElementById('data').valueAsDate = new Date();
+            
+            // Handle URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('action') === 'new') {
+                resetForm();
+                window.scrollTo({top: 0, behavior: 'smooth'});
+            } else if (urlParams.get('action') === 'pdf') {
+                setTimeout(generatePDF, 500);
+            }
+
+            // PWA install prompt
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                if (!isInstalled) {
+                    document.getElementById('installBanner').style.display = 'flex';
+                }
+            });
+
+            // Detect when PWA is installed
+            window.addEventListener('appinstalled', () => {
+                isInstalled = true;
+                document.getElementById('installBanner').style.display = 'none';
+                showToast('✅ ClassNote instalado com sucesso!');
+            });
+
+            // Handle keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                if (e.ctrlKey || e.metaKey) {
+                    switch(e.key) {
+                        case 's':
+                            e.preventDefault();
+                            saveNote();
+                            break;
+                        case 'n':
+                            e.preventDefault();
+                            resetForm();
+                            break;
+                        case 'p':
+                            e.preventDefault();
+                            generatePDF();
+                            break;
+                    }
+                }
+            });
+
+            // Handle visibility change for auto-save
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden) {
+                    // Save current work when app goes to background
+                    autoSave();
+                }
+            });
+        });
+
+        function loadNotes() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            notes = saved ? JSON.parse(saved) : [];
+            renderNotes();
+            updateStats();
+        }
+
+        function renderNotes() {
+            const list = document.getElementById('notes-list');
+            if (notes.length === 0) {
+                list.innerHTML = `
+                    <div style="text-align:center; padding:40px 20px; color:var(--text-secondary);">
+                        <i class="fas fa-sticky-note" style="font-size:3rem; margin-bottom:15px; opacity:0.5;"></i>
+                        <p>Nenhuma anotação ainda</p>
+                        <p style="font-size:0.9rem; margin-top:5px;">Comece criando sua primeira anotação de aula</p>
+                    </div>
+                `;
+                return;
+            }
+
+            list.innerHTML = notes.map((n, index) => `
+                <div class="note-card" style="animation: slideIn 0.3s ease ${index * 0.1}s both;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                        <div style="font-size:0.8rem; color:var(--text-secondary);">
+                            <i class="fas fa-calendar-alt"></i> ${new Date(n.data).toLocaleDateString('pt-BR')}
+                        </div>
+                        <div style="font-size:0.8rem; color:var(--success);">
+                            ${n.disciplina} ${n.turma ? '| ' + n.turma : ''}
+                        </div>
+                    </div>
+                    <h3 style="margin:8px 0; color:var(--text-main);">${n.conteudo || 'Sem título'}</h3>
+                    ${n.nivel_importancia ? `<span style="background:var(--warning); color:white; padding:2px 8px; border-radius:12px; font-size:0.7rem; font-weight:600;">${n.nivel_importancia}</span>` : ''}
+                    <p style="font-size:0.9rem; color:var(--text-secondary); margin-top:10px; line-height:1.4;">${n.anotacoes || 'Sem observações'}</p>
+                    <div class="note-actions">
+                        <button class="btn btn-secondary" style="padding:8px 12px; min-width:auto;" onclick="editNote(${n.id})">
+                            <i class="fas fa-edit"></i> Editar
+                        </button>
+                        <button class="btn btn-danger" style="padding:8px 12px; min-width:auto;" onclick="deleteNote(${n.id})">
+                            <i class="fas fa-trash"></i> Excluir
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function autoSave() {
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(() => {
+                const id = document.getElementById('note-id').value;
+                const note = {
+                    id: id || Date.now(),
+                    disciplina: document.getElementById('disciplina').value.trim(),
+                    turma: document.getElementById('turma').value.trim(),
+                    conteudo: document.getElementById('conteudo').value.trim(),
+                    data: document.getElementById('data').value,
+                    nivel_importancia: document.getElementById('nivel_importancia').value,
+                    anotacoes: document.getElementById('anotacoes').value.trim(),
+                    created_at: id ? notes.find(n => n.id == id)?.created_at : new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                };
+                
+                // Don't save empty notes
+                if (!note.disciplina && !note.conteudo && !note.anotacoes) return;
+                
+                if (!id) {
+                    if (notes.length >= 50) {
+                        showToast('⚠️ Limite de 50 notas atingido');
+                        return;
+                    }
+                    notes.unshift(note);
+                    document.getElementById('note-id').value = note.id;
+                } else {
+                    const idx = notes.findIndex(n => n.id == id);
+                    if (idx !== -1) notes[idx] = note;
+                }
+                
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
+                renderNotes();
+                updateStats();
+                showToast("💾 Sincronizado", 1000);
+            }, 1500);
+        }
+
+        function saveNote() {
+            clearTimeout(saveTimeout);
+            autoSave();
+            showToast("✅ Nota salva com sucesso!");
+        }
+
+        function deleteNote(id) {
+            if (confirm("🗑️ Excluir esta anotação?\n\nEsta ação não pode ser desfeita.")) {
+                notes = notes.filter(n => n.id != id);
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
+                renderNotes();
+                updateStats();
+                showToast("🗑️ Anotação excluída");
+                
+                // Clear form if editing deleted note
+                if (document.getElementById('note-id').value == id) {
+                    resetForm();
+                }
+            }
+        }
+
+        function clearAllNotes() {
+            if (confirm("🗑️ Limpar todo o histórico?\n\nTodas as anotações serão perdidas permanentemente.")) {
+                notes = [];
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
+                renderNotes();
+                updateStats();
+                resetForm();
+                showToast("🧹 Histórico limpo");
+            }
+        }
+
+        function editNote(id) {
+            const n = notes.find(n => n.id == id);
+            if (n) {
+                document.getElementById('note-id').value = n.id;
+                document.getElementById('disciplina').value = n.disciplina || '';
+                document.getElementById('turma').value = n.turma || '';
+                document.getElementById('conteudo').value = n.conteudo || '';
+                document.getElementById('data').value = n.data || '';
+                document.getElementById('nivel_importancia').value = n.nivel_importancia || '';
+                document.getElementById('anotacoes').value = n.anotacoes || '';
+                window.scrollTo({top: 0, behavior: 'smooth'});
+                showToast("📝 Editando anotação");
+            }
+        }
+
+        function generatePDF() {
+            if (notes.length === 0) {
+                showToast("⚠️ Nenhuma anotação para exportar");
+                return;
+            }
+
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                
+                // Header with post-it style background
+                doc.setFillColor(255, 255, 150); // Light yellow post-it color
+                doc.roundedRect(8, 8, 194, 35, 3, 3, 'F');
+                
+                // Header shadow
+                doc.setFillColor(0, 0, 0, 0.1);
+                doc.roundedRect(10, 10, 194, 35, 3, 3, 'F');
+                
+                // Main header background
+                doc.setFillColor(255, 255, 150);
+                doc.roundedRect(8, 8, 194, 35, 3, 3, 'F');
+                
+                // Header border
+                doc.setDrawColor(200, 200, 100);
+                doc.setLineWidth(0.5);
+                doc.roundedRect(8, 8, 194, 35, 3, 3, 'S');
+                
+                // Header text
+                doc.setTextColor(60, 60, 60);
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(18);
+                doc.text("ClassNote", 15, 22);
+                
+                doc.setFont("helvetica", "normal");
+                doc.setFontSize(12);
+                doc.text("Lembretes rápidos de aula", 15, 30);
+                
+                doc.setFontSize(9);
+                doc.text(`📅 Gerado em: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}`, 15, 37);
+                doc.text(`📝 Total: ${notes.length} anotações`, 130, 37);
+
+                let y = 55;
+                notes.forEach((n, i) => {
+                    // Check if need new page
+                    if (y > 250) { 
+                        doc.addPage(); 
+                        y = 20; 
+                    }
+                    
+                    // Post-it note background for each note
+                    const noteHeight = 45 + (n.anotacoes ? Math.ceil(n.anotacoes.length / 80) * 4 : 0);
+                    
+                    // Note shadow
+                    doc.setFillColor(0, 0, 0, 0.1);
+                    doc.roundedRect(12, y + 2, 186, noteHeight, 2, 2, 'F');
+                    
+                    // Note background (different colors for variety)
+                    const colors = [
+                        [255, 255, 150], // Yellow
+                        [150, 255, 150], // Green
+                        [150, 200, 255], // Blue
+                        [255, 200, 150], // Orange
+                        [255, 150, 255]  // Pink
+                    ];
+                    const color = colors[i % colors.length];
+                    doc.setFillColor(color[0], color[1], color[2]);
+                    doc.roundedRect(10, y, 186, noteHeight, 2, 2, 'F');
+                    
+                    // Note border
+                    doc.setDrawColor(color[0] - 50, color[1] - 50, color[2] - 50);
+                    doc.setLineWidth(0.3);
+                    doc.roundedRect(10, y, 186, noteHeight, 2, 2, 'S');
+                    
+                    // Note content
+                    doc.setTextColor(40, 40, 40);
+                    doc.setFont("helvetica", "bold");
+                    doc.setFontSize(11);
+                    doc.text(`📚 ${n.disciplina || 'Sem disciplina'}${n.turma ? ' - Turma: ' + n.turma : ''}`, 15, y + 8);
+                    
+                    doc.setFont("helvetica", "normal");
+                    doc.setFontSize(9);
+                    doc.text(`📅 ${new Date(n.data).toLocaleDateString('pt-BR')}`, 15, y + 15);
+                    
+                    if (n.nivel_importancia) {
+                        doc.text(`⭐ ${n.nivel_importancia}`, 80, y + 15);
+                    }
+                    
+                    if (n.conteudo) {
+                        doc.setFont("helvetica", "bold");
+                        doc.setFontSize(10);
+                        doc.text(`📖 Conteúdo:`, 15, y + 22);
+                        doc.setFont("helvetica", "normal");
+                        const conteudoLines = doc.splitTextToSize(n.conteudo, 160);
+                        doc.text(conteudoLines, 15, y + 28);
+                    }
+                    
+                    if (n.anotacoes) {
+                        const startY = y + (n.conteudo ? 35 : 28);
+                        doc.setFont("helvetica", "bold");
+                        doc.setFontSize(9);
+                        doc.text(`💭 Observações:`, 15, startY);
+                        doc.setFont("helvetica", "normal");
+                        const observacoes = doc.splitTextToSize(n.anotacoes, 160);
+                        doc.text(observacoes, 15, startY + 5);
+                    }
+                    
+                    y += noteHeight + 10; // Space between notes
+                });
+                
+                // Footer
+                const pageCount = doc.internal.getNumberOfPages();
+                for (let i = 1; i <= pageCount; i++) {
+                    doc.setPage(i);
+                    doc.setTextColor(100, 100, 100);
+                    doc.setFontSize(8);
+                    doc.text(`ClassNote - Lembretes rápidos de aula | Página ${i} de ${pageCount}`, 10, 290);
+                }
+                
+                doc.save(`ClassNote_Lembretes_${new Date().toISOString().split('T')[0]}.pdf`);
+                showToast("📄 PDF gerado com sucesso!");
+                
+            } catch (error) {
+                console.error('Erro ao gerar PDF:', error);
+                showToast("❌ Erro ao gerar PDF");
+            }
+        }
+
+        function resetForm() { 
+            document.getElementById('noteForm').reset(); 
+            document.getElementById('note-id').value = '';
+            document.getElementById('data').valueAsDate = new Date();
+            showToast("📝 Novo formulário");
+        }
+
+        function updateStats() { 
+            document.getElementById('total-notes').textContent = notes.length; 
+        }
+
+        function showToast(message, duration = 2500) { 
+            const toast = document.getElementById('toast'); 
+            toast.textContent = message; 
+            toast.style.display = 'block'; 
+            setTimeout(() => toast.style.display = 'none', duration); 
+        }
+
+        function installApp() { 
+            if (deferredPrompt) { 
+                deferredPrompt.prompt(); 
+                deferredPrompt.userChoice.then((result) => {
+                    if (result.outcome === 'accepted') {
+                        showToast('📱 Instalando ClassNote...');
+                    }
+                    document.getElementById('installBanner').style.display = 'none'; 
+                    deferredPrompt = null; 
+                }); 
+            }
+        }
+
+        // Register service worker
+        if ('serviceWorker' in navigator) { 
+            navigator.serviceWorker.register('./sw.js')
+                .then(registration => {
+                    console.log('SW registered:', registration);
+                })
+                .catch(error => {
+                    console.log('SW registration failed:', error);
+                });
+        }
+
+        // Add CSS animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { opacity: 0; transform: translateY(20px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
