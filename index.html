@@ -8,13 +8,11 @@
     <meta name="keywords" content="aula, lembretes, educação, professor, anotações, pedagógico">
     <meta name="author" content="ClassNote App">
     
-    <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#4361ee">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="manifest" href="./manifest.json">
     
-    <!-- iOS Meta Tags -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="ClassNote">
@@ -25,17 +23,14 @@
     <link rel="apple-touch-startup-image" href="./splash-750x1334.png" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)">
     <link rel="apple-touch-startup-image" href="./splash-1242x2208.png" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3)">
     
-    <!-- Microsoft Meta Tags -->
     <meta name="msapplication-TileColor" content="#4361ee">
     <meta name="msapplication-TileImage" content="./icon-144.png">
     <meta name="msapplication-config" content="./browserconfig.xml">
     
-    <!-- Favicon -->
     <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png">
     <link rel="shortcut icon" href="./favicon.ico">
     
-    <!-- External Resources -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -62,7 +57,8 @@
             background: linear-gradient(135deg, var(--dark) 0%, #0f3460 100%);
             color: var(--text-main);
             min-height: 100vh;
-            padding: calc(20px + var(--safe-top)) 20px calc(20px + var(--safe-bottom)) 20px;
+            /* AUMENTADO O PADDING INFERIOR PARA 120px PARA EVITAR QUE O CONTEÚDO FIQUE ESCONDIDO ATRÁS DO BANNER OU BARRA DE NAVEGAÇÃO */
+            padding: calc(20px + var(--safe-top)) 20px calc(120px + var(--safe-bottom)) 20px;
         }
 
         .container { max-width: 800px; margin: 0 auto; }
@@ -106,6 +102,10 @@
                 grid-template-columns: 1fr; 
                 gap: 15px; 
             }
+            /* Melhoria de margem para garantir visualização no mobile */
+            .main-card {
+                padding: 20px;
+            }
         }
 
         .action-buttons { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
@@ -115,11 +115,13 @@
         .btn-warning { background: linear-gradient(45deg, var(--warning), #b5179e); color: white; }
         .btn-danger { background: #e63946; color: white; }
 
-        .note-card { background: rgba(255, 255, 255, 0.05); border-radius: 18px; padding: 20px; margin-bottom: 15px; border-left: 5px solid var(--primary); }
+        .note-card { background: rgba(255, 255, 255, 0.05); border-radius: 18px; padding: 20px; margin-bottom: 15px; border-left: 5px solid var(--primary); width: 100%; }
         .note-actions { display: flex; gap: 10px; margin-top: 15px; justify-content: flex-end; }
+        
+        #notes-list { width: 100%; display: block; padding-bottom: 20px; }
 
-        #installBanner { display: none; position: fixed; bottom: 20px; left: 20px; right: 20px; background: var(--primary); padding: 15px; border-radius: 15px; z-index: 2000; justify-content: space-between; align-items: center; }
-        #toast { position: fixed; bottom: 30px; right: 30px; background: var(--success); color: white; padding: 12px 20px; border-radius: 10px; display: none; z-index: 3000; }
+        #installBanner { display: none; position: fixed; bottom: 20px; left: 20px; right: 20px; background: var(--primary); padding: 15px; border-radius: 15px; z-index: 2000; justify-content: space-between; align-items: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        #toast { position: fixed; bottom: 30px; right: 30px; background: var(--success); color: white; padding: 12px 20px; border-radius: 10px; display: none; z-index: 3000; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
     </style>
 </head>
 <body>
